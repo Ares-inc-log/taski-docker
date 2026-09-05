@@ -1,5 +1,4 @@
 # docker-compose.production.yml
-
 volumes:
   pg_data_production:
   taski_static_volume:
@@ -8,21 +7,30 @@ volumes:
 services:
   db:
     image: postgres:13.10
+    restart: always
     env_file: .env
     volumes:
       - pg_data_production:/var/lib/postgresql/data
+
   backend:
     image: haziko/taski_backend
     container_name: taski-backend
+    restart: always
     env_file: .env
+    depends_on:
+      - db
     volumes:
-      - static_volume:/backend_static
+      - taski_static_volume:/backend_static
+    networks:
+      - default
+      - web
+
   frontend:
     image: haziko/taski_frontend
     env_file: .env
     command: cp -r /app/build/. /frontend_static/
     volumes:
-      - static_volume:/frontend_static
+      - taski_static_volume:/frontend_static
 
 networks:
   web:
